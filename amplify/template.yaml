@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  HardTech Hub web frontend hosted in AWS Amplify and connected to the public
+  API Gateway endpoint.
+
+Parameters:
+  AppName:
+    Type: String
+    Default: hardtech-hub-web
+    Description: Name shown for the application in AWS Amplify.
+    AllowedPattern: "[A-Za-z0-9-]+"
+
+  RepositoryUrl:
+    Type: String
+    Default: https://github.com/SebaU12/HardTechHub-v2
+    Description: Public GitHub repository that contains the frontend directory.
+    AllowedPattern: "https://github.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:\\.git)?"
+
+  BranchName:
+    Type: String
+    Default: main
+    Description: Git branch deployed as the production site.
+    AllowedPattern: "[A-Za-z0-9._/-]+"
+
+  ApiBaseUrl:
+    Type: String
+    Default: https://s7d3vxbohi.execute-api.us-east-1.amazonaws.com
+    Description: HTTPS base URL of the API Gateway consumed by the React app.
+    AllowedPattern: "https://.+"
+
+  GitHubAccessToken:
+    Type: String
+    NoEcho: true
+    MinLength: 1
+    Description: >-
+      GitHub personal access token used only to connect Amplify to the
+      repository. Never commit this value.
+
+Resources:
+  AmplifyApp:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: !Ref AppName
+      Description: HardTech Hub React frontend for the university cloud project.
+      Repository: !Ref RepositoryUrl
+      AccessToken: !Ref GitHubAccessToken
+      Platform: WEB
+      EnableBranchAutoDeletion: true
+      EnvironmentVariables:
+        - Name: VITE_API_BASE_URL
+          Value: !Ref ApiBaseUrl
+      BuildSpec: |
+        version: 1
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - npm ci --prefix frontend
+            build:
+              commands:
+                - npm run build --prefix frontend
+          artifacts:
+            baseDirectory: frontend/dist
+            files:
+              - '**/*'
+          cache:
+            paths:
+              - frontend/node_modules/**/*
+      CustomRules:
+        - Source: '</^[^.]+$|\.(?!(css|gif|ico|jpg|jpeg|js|png|txt|svg|woff|woff2|ttf|map|json|webp|avif)$)([^.]+$)/>'
+          Target: /index.html
+          Status: "200"
+      Tags:
+        - Key: project
+          Value: hardtech-hub
+        - Key: component
+          Value: frontend
+        - Key: managed-by
+          Value: cloudformation
+
+  ProductionBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId: !GetAtt AmplifyApp.AppId
+      BranchName: !Ref BranchName
+      Description: Production branch for the HardTech Hub web application.
+      EnableAutoBuild: true
+      EnablePullRequestPreview: false
+      Framework: React
+      Stage: PRODUCTION
+      Tags:
+        - Key: project
+          Value: hardtech-hub
+        - Key: component
+          Value: frontend
+
+Outputs:
+  AmplifyAppId:
+    Description: ID of the AWS Amplify application.
+    Value: !GetAtt AmplifyApp.AppId
+
+  AmplifyAppArn:
+    Description: ARN of the AWS Amplify application.
+    Value: !GetAtt AmplifyApp.Arn
+
+  AmplifyDefaultDomain:
+    Description: Default domain assigned by AWS Amplify.
+    Value: !GetAtt AmplifyApp.DefaultDomain
+
+  ProductionBranchName:
+    Description: Branch deployed by AWS Amplify.
+    Value: !GetAtt ProductionBranch.BranchName
+
+  WebsiteUrl:
+    Description: Public URL of the HardTech Hub frontend.
+    Value: !Sub "https://${BranchName}.${AmplifyApp.DefaultDomain}"
+
+  ConfiguredApiBaseUrl:
+    Description: API Gateway URL embedded in the production build.
+    Value: !Ref ApiBaseUrl
+
+  Repository:
+    Description: Public source repository connected to Amplify.
+    Value: !Ref RepositoryUrl
