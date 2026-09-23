@@ -12,7 +12,7 @@ Parameters:
 
   RepositoryUrl:
     Type: String
-    Default: https://github.com/SebaU12/HardTechHub-v2
+    Default: https://github.com/SebaU12/HardTechHub-v2-frontend.git
     Description: Public GitHub repository that contains the frontend directory.
     AllowedPattern: "https://github.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:\\.git)?"
 

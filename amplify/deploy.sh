@@ -4,7 +4,7 @@ set -euo pipefail
 AWS_REGION=${1:-${AWS_DEFAULT_REGION:-us-east-1}}
 STACK_NAME=${2:-hardtech-amplify-web}
 BRANCH_NAME=${3:-main}
-REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/SebaU12/HardTechHub-v2}
+REPOSITORY_URL=${REPOSITORY_URL:-https://github.com/SebaU12/HardTechHub-v2-frontend.git}
 API_BASE_URL=${API_BASE_URL:-https://s7d3vxbohi.execute-api.us-east-1.amazonaws.com}
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 

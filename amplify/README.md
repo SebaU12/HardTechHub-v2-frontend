@@ -35,7 +35,34 @@ push posteriores se despliegan mediante el build automático de la rama.
 
 No escribas el token en un archivo `.env`, en la plantilla ni en Git.
 
-## Despliegue
+## Despliegue desde la consola web de AWS
+
+1. Instala la aplicación **AWS Amplify us-east-1** en GitHub y concédele acceso
+   únicamente a `HardTechHub-v2-frontend`.
+2. Crea un token personal clásico de GitHub, con expiración corta y únicamente
+   el scope `admin:repo_hook`.
+3. Abre **AWS CloudFormation > Create stack > With new resources**.
+4. Selecciona **Upload a template file** y carga `amplify/template.yaml`.
+5. Usa `hardtech-amplify-web` como nombre del stack.
+6. Comprueba los parámetros y pega el token sólo en `GitHubAccessToken`:
+
+   ```text
+   AppName: hardtech-hub-web
+   RepositoryUrl: https://github.com/SebaU12/HardTechHub-v2-frontend.git
+   BranchName: main
+   ApiBaseUrl: https://s7d3vxbohi.execute-api.us-east-1.amazonaws.com
+   ```
+
+7. Crea el stack y espera a que llegue a `CREATE_COMPLETE`.
+8. Abre **AWS Amplify > hardtech-hub-web > main** y selecciona **Run build** si
+   todavía no existe una compilación.
+9. Cuando el job termine en `SUCCEED`, abre el output `WebsiteUrl` del stack.
+
+El token está marcado como `NoEcho` en CloudFormation y Amplify lo usa para
+autorizar la conexión inicial. Puede revocarse en GitHub después de comprobar
+que la aplicación y el webhook quedaron conectados.
+
+## Despliegue alternativo con AWS CLI
 
 Desde la raíz del proyecto:
 
@@ -44,14 +71,14 @@ read -rsp "GitHub token: " GITHUB_ACCESS_TOKEN
 echo
 export GITHUB_ACCESS_TOKEN
 
-bash infrastructure/amplify/deploy.sh us-east-1 hardtech-amplify-web main
+bash amplify/deploy.sh us-east-1 hardtech-amplify-web main
 unset GITHUB_ACCESS_TOKEN
 ```
 
 El script usa por defecto:
 
 ```text
-Repositorio: https://github.com/SebaU12/HardTechHub-v2
+Repositorio: https://github.com/SebaU12/HardTechHub-v2-frontend.git
 API Gateway: https://s7d3vxbohi.execute-api.us-east-1.amazonaws.com
 ```
 
@@ -60,7 +87,7 @@ Para reemplazar el endpoint después de recrear el backend:
 ```bash
 export API_BASE_URL="https://NUEVO_ID.execute-api.us-east-1.amazonaws.com"
 export GITHUB_ACCESS_TOKEN="TU_TOKEN_TEMPORAL"
-bash infrastructure/amplify/deploy.sh us-east-1 hardtech-amplify-web main
+bash amplify/deploy.sh us-east-1 hardtech-amplify-web main
 unset GITHUB_ACCESS_TOKEN API_BASE_URL
 ```
 
