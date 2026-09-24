@@ -261,3 +261,28 @@ export interface CartItem {
   product: Product
   quantity: number
 }
+
+export interface InventoryStock {
+  product_id: number
+  available_quantity: number
+  reserved_quantity: number
+  sellable_quantity: number
+  minimum_quantity: number
+  low_stock: boolean
+  updated_at: string
+}
+
+export interface LowStockResponse {
+  items: InventoryStock[]
+  limit: number
+  offset: number
+}
+
+export interface AdjustStockRequest {
+  product_id: number
+  quantity_delta: number
+  minimum_quantity?: number
+  reason: string
+}
+
+export type AdjustStockResponse = InventoryStock

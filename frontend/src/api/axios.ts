@@ -31,6 +31,7 @@ export const analyticsApi = createApi(
   import.meta.env.VITE_ANALYTICS_API_URL,
   ANALYTICS_API_TIMEOUT_MS,
 )
+export const inventoryApi = createApi(import.meta.env.VITE_INVENTORY_API_URL)
 
 
 export function setAccessToken(token: string | null): void {
@@ -40,6 +41,7 @@ export function setAccessToken(token: string | null): void {
     orderApi,
     compatibilityApi,
     analyticsApi,
+    inventoryApi,
   ]) {
     if (token) client.defaults.headers.common.Authorization = `Bearer ${token}`
     else delete client.defaults.headers.common.Authorization

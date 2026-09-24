@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import axios from 'axios'
 import { useCart, useCreateOrder } from '../hooks'
 import { CartSummary } from '../components/cart/CartSummary'
 import { ProductImage } from '../components/product/ProductImage'
@@ -24,8 +25,14 @@ export function CheckoutPage() {
         state: { registered: true, orderCreated: result },
       })
     } catch (failure) {
-      setLocalError(getApiErrorMessage(failure))
-    }
+      if (axios.isAxiosError(failure) && failure.response?.status === 409) {
+        setLocalError(
+          'No hay suficiente stock para completar el pedido. Revisa las cantidades disponibles y vuelve a intentarlo.',
+        )
+      } else {
+        setLocalError(getApiErrorMessage(failure))
+      }
+      }
   }
   return (
     <div className="container page">

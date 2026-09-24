@@ -4,11 +4,13 @@ export function QuantitySelector({
   onChange,
   label = 'Cantidad',
   disabled = false,
+  max = 999,
 }: {
   value: number
   onChange: (value: number) => void
   label?: string
   disabled?: boolean
+  max?: number
 }) {
   return (
     <div className="quantity-selector" role="group" aria-label={label}>
@@ -22,7 +24,7 @@ export function QuantitySelector({
       <output aria-live="polite">{value}</output>
       <button
         aria-label={`Aumentar ${label}`}
-        disabled={disabled || value >= 999}
+        disabled={disabled || value >= max}
         onClick={() => onChange(value + 1)}
       >
         <Plus size={15} />

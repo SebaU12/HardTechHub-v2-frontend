@@ -15,6 +15,7 @@ import { ProfilePage } from './pages/ProfilePage'
 import { HelpPage } from './pages/HelpPage'
 import { CompatibilityPage } from './pages/CompatibilityPage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
+import { InventoryPage } from './pages/InventoryPage'
 import './App.css'
 export default function App() {
   return (
@@ -29,6 +30,8 @@ export default function App() {
         <Route path="ayuda" element={<HelpPage />} />
         <Route path="compatibilidad" element={<CompatibilityPage />} />
         <Route path="analitica" element={<AnalyticsPage />} />
+        <Route path="inventario" element={<InventoryPage />} />
+        <Route path="inventario" element={<InventoryPage />} />
         <Route element={<RequireAuth />}>
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="pedidos" element={<OrdersPage />} />

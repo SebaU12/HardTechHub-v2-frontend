@@ -11,6 +11,7 @@ import {
   LogOut,
   ShieldCheck,
   BarChart3,
+  Boxes,
 } from 'lucide-react'
 import wordmark from '../../assets/wordmark.webp'
 
@@ -191,6 +192,14 @@ export function Header() {
           <Link to="/analitica" onClick={() => setMenu(false)}>
             <BarChart3 size={18} />
             Dashboard analítico
+          </Link>
+          <Link to="/inventario" onClick={() => setMenu(false)}>
+            <Boxes size={18} />
+            Inventario
+          </Link>
+          <Link to="/inventario" onClick={() => setMenu(false)}>
+            <Boxes size={18} />
+            Inventario
           </Link>
           {user && (
             <button onClick={logout}>

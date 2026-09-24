@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ShoppingCart, ArrowRight, Package, ChevronRight } from 'lucide-react'
 import { useProduct } from '../hooks'
+import { useInventory } from '../hooks/useInventory'
 import { useProductPurchase } from '../hooks/useProductPurchase'
 import { formatPrice } from '../utils/formatPrice'
 import { specValue } from '../utils/catalog'
@@ -16,8 +17,13 @@ export function ProductPage() {
 }
 function ProductDetail({ id }: { id: number }) {
   const { product, loading, error, refetch } = useProduct(id)
+  const { stock } = useInventory(id)
   const [quantity, setQuantity] = useState(1)
   const { add, feedback, failed } = useProductPurchase()
+  const sellable = stock?.sellable_quantity ?? null
+  const outOfStock = sellable !== null && sellable <= 0
+  const canBuy = product?.is_active && !outOfStock
+  const maxQty = sellable !== null && sellable > 0 ? sellable : 999
   return (
     <div className="container page">
       <Breadcrumb
@@ -66,6 +72,17 @@ function ProductDetail({ id }: { id: number }) {
                   ? 'Producto activo en catálogo'
                   : 'Producto inactivo'}
               </span>
+              {sellable !== null && (
+                <span
+                  className={`status-badge ${outOfStock ? 'status-cancelled' : sellable <= 5 ? 'status-pending' : 'status-shipped'}`}
+                >
+                  {outOfStock
+                    ? 'Sin stock disponible'
+                    : sellable <= 5
+                      ? `Últimas ${sellable} unidades`
+                      : `${sellable} unidades disponibles`}
+                </span>
+              )}
               <p className="detail-description">
                 {product.description ||
                   'Consulta las especificaciones de este componente a continuación.'}
@@ -75,13 +92,14 @@ function ProductDetail({ id }: { id: number }) {
                 <QuantitySelector
                   value={quantity}
                   onChange={setQuantity}
-                  disabled={!product.is_active}
+                  max={maxQty}
+                  disabled={!canBuy}
                 />
               </div>
               <div className="purchase-actions">
                 <button
                   className="button"
-                  disabled={!product.is_active}
+                  disabled={!canBuy}
                   onClick={() => add(product, quantity)}
                 >
                   <ShoppingCart size={18} />
@@ -89,7 +107,7 @@ function ProductDetail({ id }: { id: number }) {
                 </button>
                 <button
                   className="button button-secondary"
-                  disabled={!product.is_active}
+                  disabled={!canBuy}
                   onClick={() => add(product, quantity, true)}
                 >
                   Comprar ahora

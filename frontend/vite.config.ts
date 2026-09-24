@@ -31,6 +31,10 @@ export default defineConfig(({ mode }) => {
           target: target(env.VITE_ANALYTICS_API_URL),
           changeOrigin: true,
         },
+        '/api/inventory': {
+          target: target(env.VITE_INVENTORY_API_URL),
+          changeOrigin: true,
+        },
       },
     },
   }
