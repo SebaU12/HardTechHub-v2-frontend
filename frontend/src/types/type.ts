@@ -82,6 +82,12 @@ export interface DeleteProductResponse extends EventPublication {
 }
 
 export type OrderStatus = 'PENDING' | 'PAID' | 'SHIPPED' | 'CANCELLED'
+export type InventoryOrderStatus =
+  | 'RESERVED'
+  | 'CONFIRMED'
+  | 'CONFIRMATION_PENDING'
+  | 'RELEASED'
+  | 'CANCELLED'
 
 // FastAPI puede serializar Decimal como número en lecturas de MySQL; las
 // respuestas de creación y Athena conservan explícitamente strings decimales.
@@ -101,6 +107,8 @@ export interface CreateOrderResponse extends EventPublication {
   order_id: number
   status: OrderStatus
   total_amount: string
+  inventory_reservation_id: string
+  inventory_status: InventoryOrderStatus
 }
 
 export interface Order {
@@ -111,6 +119,8 @@ export interface Order {
   tax: Money
   shipping_cost: Money
   total_amount: Money
+  inventory_reservation_id?: string | null
+  inventory_status?: InventoryOrderStatus | null
   created_at: string
   updated_at: string
 }
@@ -134,6 +144,7 @@ export interface OrderDetail {
 export interface UpdateOrderStatusResponse extends EventPublication {
   order_id: number
   status: OrderStatus
+  inventory_status: InventoryOrderStatus | null
 }
 
 export type ComponentType = 'cpu' | 'motherboard' | 'ram' | 'gpu' | 'psu'
@@ -270,6 +281,9 @@ export interface InventoryStock {
   minimum_quantity: number
   low_stock: boolean
   updated_at: string
+  event_published?: boolean | null
+  event_key?: string | null
+  event_keys?: string[] | null
 }
 
 export interface LowStockResponse {

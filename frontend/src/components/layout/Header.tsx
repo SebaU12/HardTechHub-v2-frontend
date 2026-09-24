@@ -197,10 +197,6 @@ export function Header() {
             <Boxes size={18} />
             Inventario
           </Link>
-          <Link to="/inventario" onClick={() => setMenu(false)}>
-            <Boxes size={18} />
-            Inventario
-          </Link>
           {user && (
             <button onClick={logout}>
               <LogOut size={18} />

@@ -790,6 +790,14 @@
   color: #ff9a53;
 }
 
+.card-stock {
+  display: block;
+  min-height: 18px;
+  margin: -5px 0 8px;
+  color: #9ecca9;
+  font-size: 9px;
+}
+
 .card-add:hover:not(:disabled) {
   background: var(--accent);
   color: #101010;

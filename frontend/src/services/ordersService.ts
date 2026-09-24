@@ -2,13 +2,21 @@
 import {orderApi} from '../api/axios'
 import type {CreateOrderRequest, CreateOrderResponse, Order, OrderDetail, OrderStatus, UpdateOrderStatusResponse} from '../types/type'
 
-export async function createOrder( payload: CreateOrderRequest): Promise<CreateOrderResponse> {
+export async function createOrder(
+    payload: CreateOrderRequest,
+    idempotencyKey: string,
+): Promise<CreateOrderResponse> {
     if (!payload.user_id || !payload.items.length || payload.items.some(item =>
         !Number.isSafeInteger(item.product_id) || item.product_id <= 0 ||
         !Number.isSafeInteger(item.quantity) || item.quantity <= 0)) {
         throw new Error('El pedido requiere un usuario y productos con cantidades enteras positivas')
     }
-    const { data } = await orderApi.post<CreateOrderResponse>('/api/orders',payload)
+    if (idempotencyKey.length < 16 || idempotencyKey.length > 100) {
+        throw new Error('La clave de idempotencia debe tener entre 16 y 100 caracteres')
+    }
+    const { data } = await orderApi.post<CreateOrderResponse>('/api/orders', payload, {
+        headers: { 'Idempotency-Key': idempotencyKey },
+    })
     return data
 }
 

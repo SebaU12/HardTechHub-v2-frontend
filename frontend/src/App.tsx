@@ -31,7 +31,6 @@ export default function App() {
         <Route path="compatibilidad" element={<CompatibilityPage />} />
         <Route path="analitica" element={<AnalyticsPage />} />
         <Route path="inventario" element={<InventoryPage />} />
-        <Route path="inventario" element={<InventoryPage />} />
         <Route element={<RequireAuth />}>
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="pedidos" element={<OrdersPage />} />

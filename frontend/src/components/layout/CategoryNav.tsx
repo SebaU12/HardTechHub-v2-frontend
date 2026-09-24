@@ -1,4 +1,4 @@
-import { ArrowUpRight, BarChart3, Grid2X2, ShieldCheck, Zap } from 'lucide-react'
+import { ArrowUpRight, BarChart3, Boxes, Grid2X2, ShieldCheck, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { categories, categoryHref } from '../../data/categories'
 export function CategoryNav() {
@@ -21,6 +21,10 @@ export function CategoryNav() {
         <Link className="analytics-link" to="/analitica">
           <BarChart3 size={14} />
           Analítica
+        </Link>
+        <Link className="inventory-link" to="/inventario">
+          <Boxes size={14} />
+          Inventario
         </Link>
         <Link className="offers-link" to="/productos?sort=price-asc">
           <Zap size={14} />

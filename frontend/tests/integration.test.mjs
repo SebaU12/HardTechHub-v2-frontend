@@ -14,7 +14,7 @@ after(() => rm(temporary, { recursive: true, force: true }))
 const modules = [
   'api/axios', 'api/errors', 'services/authService', 'services/catalogService',
   'services/ordersService', 'services/analyticsServices',
-  'services/compatibilityServices', 'utils/catalog',
+  'services/compatibilityServices', 'services/inventoryService', 'utils/catalog',
   'utils/authSession', 'utils/orderTotals',
 ]
 for (const name of modules) {
@@ -36,6 +36,7 @@ const catalog = await load('services/catalogService')
 const orders = await load('services/ordersService')
 const analytics = await load('services/analyticsServices')
 const compatibility = await load('services/compatibilityServices')
+const inventory = await load('services/inventoryService')
 const errors = await load('api/errors')
 const catalogUtils = await load('utils/catalog')
 const authSession = await load('utils/authSession')
@@ -58,6 +59,7 @@ test('API clients use local proxy, shared headers and service-specific timeouts'
     api.orderApi,
     api.compatibilityApi,
     api.analyticsApi,
+    api.inventoryApi,
   ]) {
     assert.equal(client.defaults.headers.common.Authorization, 'Bearer example')
     assert.equal(client.defaults.baseURL, '/')
@@ -110,17 +112,43 @@ test('orders reject empty or nonpositive quantities before HTTP', async () => {
     total_amount: '143.00',
     event_published: true,
     event_key: 'raw/events/orders/example.json',
+    inventory_reservation_id: '7c5144b3-2f05-41a5-b939-b959c4b09ca3',
+    inventory_status: 'CONFIRMED',
   }
   const calls = mock(api.orderApi, response)
   for (const items of [[], [{ product_id: 1, quantity: 0 }], [{ product_id: 1, quantity: -1 }], [{ product_id: 1, quantity: 1.5 }]]) {
-    await assert.rejects(orders.createOrder({ user_id: 'user', items }))
+    await assert.rejects(orders.createOrder({ user_id: 'user', items }, 'checkout-test-000001'))
   }
   assert.equal(calls.length, 0)
   const payload = { user_id: 'user', items: [{ product_id: 1, quantity: 2 }] }
-  assert.deepEqual(await orders.createOrder(payload), response)
+  assert.deepEqual(await orders.createOrder(payload, 'checkout-test-000001'), response)
   assert.deepEqual(JSON.parse(calls[0].data), payload)
+  assert.equal(calls[0].headers['Idempotency-Key'], 'checkout-test-000001')
   await orders.getMyOrders('user/name')
   assert.equal(calls[1].url, '/api/orders/user/user%2Fname')
+})
+
+test('inventory uses deployed stock, low-stock and adjustment contracts', async () => {
+  const response = {
+    product_id: 1,
+    available_quantity: 20,
+    reserved_quantity: 2,
+    sellable_quantity: 18,
+    minimum_quantity: 5,
+    low_stock: false,
+    updated_at: '2026-09-23T20:00:00Z',
+  }
+  const calls = mock(api.inventoryApi, response)
+  await inventory.getStock(1)
+  await inventory.getLowStock()
+  const adjustment = { product_id: 1, quantity_delta: 5, reason: 'Recepción' }
+  await inventory.adjustStock(adjustment)
+  assert.deepEqual(calls.map(call => [call.method, call.url]), [
+    ['get', '/api/inventory/1'],
+    ['get', '/api/inventory/low-stock'],
+    ['post', '/api/inventory/adjustments'],
+  ])
+  assert.deepEqual(JSON.parse(calls[2].data), adjustment)
 })
 
 test('checkout estimate matches the backend tax and shipping rules', () => {
